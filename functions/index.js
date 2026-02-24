@@ -1,40 +1,53 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const nodemailer = require("nodemailer"); // npm install nodemailer
+const nodemailer = require("nodemailer");
 
+// Initialize Firebase Admin
 admin.initializeApp();
 const db = admin.firestore();
 
-// Configure Email Transporter (Use App Password for Gmail)
+// 1. Configure Email Transporter (Use Gmail App Password)
+// GOOGLE: Manage Account -> Security -> 2-Step Verification -> App Passwords
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "sb5846868@gmail.com",
-    pass: "SKTCAPP"
+    user: "your-email@gmail.com", // REPLACE THIS
+    pass: "xxxx xxxx xxxx xxxx"    // REPLACE THIS (App Password, not login password)
   }
 });
 
+// 2. Purchase Gift Card Function
 exports.buyGiftCard = functions.https.onCall(async (data, context) => {
-  if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Login required");
+  // Security: Check if user is logged in
+  if (!context.auth) {
+    throw new functions.https.HttpsError("unauthenticated", "You must be logged in.");
+  }
 
-  const { productId, platform, amount, price } = data;
+  const { platform, amount, price } = data;
   const userId = context.auth.uid;
+  const userEmail = context.auth.token.email;
 
-  // Run as a Transaction (Atomic Operation)
+  // Run Atomic Transaction
   return db.runTransaction(async (t) => {
-    // 1. Get User
+    // A. Get User Balance
     const userRef = db.collection("users").doc(userId);
     const userDoc = await t.get(userRef);
-    const userBalance = userDoc.data().balance;
 
-    if (userBalance < price) {
+    if (!userDoc.exists) {
+      throw new functions.https.HttpsError("not-found", "User not found");
+    }
+
+    const currentBalance = userDoc.data().balance || 0;
+
+    // B. Check Balance
+    if (currentBalance < price) {
       throw new functions.https.HttpsError("failed-precondition", "Insufficient Balance");
     }
 
-    // 2. Find an unused code for this product
+    // C. Find Unused Code
     const inventoryQuery = db.collection("inventory")
       .where("platform", "==", platform)
-      .where("value", "==", amount) // e.g., 100 Diamonds
+      .where("value", "==", amount)
       .where("isUsed", "==", false)
       .limit(1);
 
@@ -47,37 +60,56 @@ exports.buyGiftCard = functions.https.onCall(async (data, context) => {
     const itemDoc = inventorySnap.docs[0];
     const giftCode = itemDoc.data().code;
 
-    // 3. Execute Updates
-    const newBalance = userBalance - price;
+    // D. Deduct Balance & Mark Code Used
+    const newBalance = currentBalance - price;
+    
     t.update(userRef, { balance: newBalance });
-    t.update(itemDoc.ref, { isUsed: true, usedBy: userId, usedAt: admin.firestore.FieldValue.serverTimestamp() });
+    t.update(itemDoc.ref, { 
+      isUsed: true, 
+      usedBy: userId, 
+      usedAt: admin.firestore.FieldValue.serverTimestamp() 
+    });
 
-    // 4. Create Order Record
+    // E. Save Order History
     const orderRef = db.collection("orders").doc();
     t.set(orderRef, {
-      userId,
-      platform,
-      code: giftCode,
+      userId: userId,
+      platform: platform,
       amount: amount,
       price: price,
+      code: giftCode, // Saved in history just in case email fails
       date: admin.firestore.FieldValue.serverTimestamp()
     });
 
     return { success: true, code: giftCode, orderId: orderRef.id };
-  }).then(async (result) => {
-    // 5. Send Email (After transaction success)
-    await transporter.sendMail({
-      from: "GameStore Nepal <noreply@gamestore.np>",
-      to: context.auth.token.email,
-      subject: `Your ${platform} Code is here!`,
-      html: `
-        <h1>Order Successful!</h1>
-        <p>Platform: ${platform}</p>
-        <p>Value: ${amount}</p>
-        <p style="font-size: 24px; color: blue; font-weight: bold;">Code: ${result.code}</p>
-        <p>Order ID: ${result.orderId}</p>
-      `
-    });
+  })
+  .then(async (result) => {
+    // F. Send Email (Outside transaction to prevent lag)
+    try {
+      await transporter.sendMail({
+        from: '"GameStore Nepal" <your-email@gmail.com>',
+        to: userEmail,
+        subject: `Your ${platform} Code: ${result.code}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd;">
+            <h2 style="color: #45a29e;">Purchase Successful!</h2>
+            <p>Here is your digital code:</p>
+            <div style="background: #eee; padding: 15px; font-size: 20px; font-weight: bold; letter-spacing: 2px; text-align: center;">
+              ${result.code}
+            </div>
+            <p><strong>Platform:</strong> ${platform}</p>
+            <p><strong>Value:</strong> ${amount}</p>
+            <p><strong>Order ID:</strong> ${result.orderId}</p>
+            <br/>
+            <p style="font-size: 12px; color: #888;">Thank you for gaming with us!</p>
+          </div>
+        `
+      });
+    } catch (emailError) {
+      console.error("Email failed:", emailError);
+      // We don't throw error here because purchase was successful
+    }
+
     return result;
   });
 });
