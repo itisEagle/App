@@ -43,3 +43,4 @@ function ensureUserDocument(user) {
     console.warn("User doc error:", e);
   });
 }
+
