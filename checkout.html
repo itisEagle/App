@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav><div class="container"><div class="logo"><a href="index.html">GiftStore</a></div></div></nav>
+
+    <div class="container" id="checkout-form" style="margin-top: 40px;">
+        <h1 style="margin-bottom:30px; font-weight:800;">Secure Checkout</h1>
+        
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap:30px;">
+            
+            <!-- Left: Payment Selection -->
+            <div>
+                <div class="checkout-summary">
+                    <h3 style="margin-bottom: 20px;">1. Select Payment Method</h3>
+                    
+                    <!-- Grid of Cards -->
+                    <div id="pay-method-grid" class="payment-grid">
+                        <!-- Loaded via JS -->
+                        <p>Loading methods...</p>
+                    </div>
+
+                    <!-- Selected Details Area -->
+                    <div id="pay-method-details" class="pay-details-box">
+                        <!-- Details appear here on click -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Order Summary & Proof -->
+            <div>
+                <div class="checkout-summary">
+                    <h3 style="margin-bottom: 20px;">2. Order Summary</h3>
+                    
+                    <div style="background: var(--bg-body); border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                        <div id="order-items-summary" style="font-size:0.95rem;"></div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 25px;">
+                        <span style="font-size: 1.1rem; color: var(--text-muted);">Total Amount</span>
+                        <strong id="checkout-total" style="color:var(--primary); font-size:1.8rem;"></strong>
+                    </div>
+
+                    <div class="input-group">
+                        <label>3. Upload Payment Screenshot</label>
+                        <div style="border: 2px dashed var(--border); padding: 20px; text-align: center; border-radius: 8px; background: #fafafa;">
+                            <input type="file" id="pay-proof-file" accept="image/*" style="width:100%;">
+                        </div>
+                        <small>Please upload the receipt after sending payment.</small>
+                    </div>
+
+                    <button id="place-order-btn" class="btn" style="width:100%; padding: 16px;">Confirm Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

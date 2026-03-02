@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Gift Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="logo">GiftStore</div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="orders.html">My Orders</a>
+                <a href="admin.html" id="admin-link" style="display:none; color:var(--danger);">Admin Panel</a>
+                <div class="cart-icon" onclick="window.location.href='cart.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm7 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-8-4l-3-15h-3m18 3l-2 10h-13l-1.5-7.5h16.5z"></path></svg>
+                    <span class="badge" id="cart-count">0</span>
+                </div>
+                <button id="auth-btn" class="btn btn-sm">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 30px;">
+        <div class="hero">
+            <h1>Buy Digital Gift Cards Instantly</h1>
+            <p>Secure payment, instant delivery, and 24/7 support.</p>
+        </div>
+
+        <h3 style="margin-bottom: 15px; font-weight: 700;">Browse Categories</h3>
+        <div class="category-scroll" id="cat-filters">
+            <!-- Loaded by JS -->
+        </div>
+
+        <h3 style="margin: 30px 0 20px; font-weight: 700;">Featured Products</h3>
+        <div class="grid grid-responsive" id="product-grid">
+            <!-- Loaded by JS -->
+            <p style="color:var(--text-muted);">Loading products...</p>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
