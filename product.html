@@ -26,11 +26,12 @@
                 <img id="p-img" class="p-large-img" src="" alt="Product Image">
             </div>
             
-            <div class="p-info-box">
-                <small style="text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700;">Name</small>
-                <h1 id="p-title" style="font-size: 2rem; margin: 5px 0 15px;">Loading...</h1>
+                        <div class="p-info-box">
+                <small style="text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700;">Digital Code</small>
+                <h1 id="p-title" style="font-size: 1.8rem; margin: 5px 0 10px;">Loading...</h1>
                 
-                <h2 id="p-price" style="color:var(--primary); font-size: 2.2rem; margin-bottom: 20px;"></h2>
+                <!-- Price Display -->
+                <h2 id="p-price" style="color:var(--primary); font-size: 2rem; margin-bottom: 20px;"></h2>
                 
                 <!-- Variant Selector -->
                 <div class="input-group">
@@ -38,8 +39,12 @@
                     <select id="p-variant"></select>
                 </div>
 
+                <!-- Custom Fields (Player ID, etc) -->
                 <div id="custom-fields"></div>
+
+               
                 
+                <!-- Action Buttons -->
                 <div style="display: flex; gap: 15px; margin-top: 30px;">
                     <button id="add-cart-btn" class="btn btn-outline" style="flex:1;">Add to Cart</button>
                     <button id="buy-now-btn" class="btn" style="flex:1;">Buy Now</button>
